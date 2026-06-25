@@ -31,3 +31,21 @@ def get_balance(transactions: list[dict[str, Any]]) -> float:
         return 0.0
 
     return float(sum(transaction["amount"] for transaction in transactions))
+
+
+def filter_by_category(transactions: list[dict[str, Any]], category: str) -> list[dict[str, Any]]:
+    """Return transactions matching the given category, case-insensitively.
+
+    Args:
+        transactions: Transaction records to filter.
+        category: Category name to match.
+
+    Returns:
+        A new list containing matching transactions.
+    """
+    normalized_category = category.lower()
+    return [
+        transaction
+        for transaction in transactions
+        if transaction["category"].lower() == normalized_category
+    ]

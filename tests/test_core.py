@@ -1,6 +1,6 @@
 """Tests for budget.core."""
 
-from budget.core import add_transaction, get_balance
+from budget.core import add_transaction, filter_by_category, get_balance
 
 
 def test_add_transaction_increases_length() -> None:
@@ -111,3 +111,88 @@ def test_get_balance_sums_step2_transactions_correctly() -> None:
     ]
 
     assert get_balance(transactions) == 3448380
+
+
+def test_filter_by_category_matches_case_insensitively() -> None:
+    transactions = [
+        {
+            "date": "2026-01-04",
+            "type": "지출",
+            "category": "여행",
+            "description": "항공권",
+            "amount": -979796,
+            "memo": "메모_3",
+        },
+        {
+            "date": "2026-01-05",
+            "type": "지출",
+            "category": "의료",
+            "description": "한의원",
+            "amount": -65990,
+            "memo": "카드결제",
+        },
+        {
+            "date": "2026-01-10",
+            "type": "지출",
+            "category": "문화/여가",
+            "description": "게임 아이템",
+            "amount": -75010,
+            "memo": "",
+        },
+    ]
+
+    result = filter_by_category(transactions, "여행")
+
+    assert result == [transactions[0]]
+    assert filter_by_category(transactions, "여행") == filter_by_category(transactions, "여행".upper())
+
+
+def test_filter_by_category_returns_empty_list_for_missing_category() -> None:
+    transactions = [
+        {
+            "date": "2026-01-04",
+            "type": "지출",
+            "category": "여행",
+            "description": "항공권",
+            "amount": -979796,
+            "memo": "메모_3",
+        }
+    ]
+
+    assert filter_by_category(transactions, "주식") == []
+
+
+def test_filter_by_category_result_is_independent_of_original_list() -> None:
+    transactions = [
+        {
+            "date": "2026-01-04",
+            "type": "지출",
+            "category": "여행",
+            "description": "항공권",
+            "amount": -979796,
+            "memo": "메모_3",
+        },
+        {
+            "date": "2026-01-05",
+            "type": "지출",
+            "category": "의료",
+            "description": "한의원",
+            "amount": -65990,
+            "memo": "카드결제",
+        },
+    ]
+
+    result = filter_by_category(transactions, "여행")
+    result.append(
+        {
+            "date": "2026-01-99",
+            "type": "지출",
+            "category": "여행",
+            "description": "임시",
+            "amount": -1,
+            "memo": "",
+        }
+    )
+
+    assert len(transactions) == 2
+    assert len(result) == 2
