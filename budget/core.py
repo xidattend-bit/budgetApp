@@ -15,5 +15,4 @@ def add_transaction(transactions: list[dict[str, Any]], transaction: dict[str, A
     Returns:
         A new list containing the added transaction.
     """
-    pass
-
+    return [*transactions, transaction]
