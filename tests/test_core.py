@@ -1,6 +1,11 @@
 """Tests for budget.core."""
 
-from budget.core import add_transaction, filter_by_category, get_balance
+from budget.core import (
+    add_transaction,
+    filter_by_category,
+    get_balance,
+    load_transactions_from_csv,
+)
 
 
 def test_add_transaction_increases_length() -> None:
@@ -196,3 +201,25 @@ def test_filter_by_category_result_is_independent_of_original_list() -> None:
 
     assert len(transactions) == 2
     assert len(result) == 2
+
+
+def test_load_transactions_from_csv_reads_step1_data() -> None:
+    transactions = load_transactions_from_csv("data/step1_transactions.csv")
+
+    assert len(transactions) == 10
+    assert transactions[0] == {
+        "date": "2026-01-05",
+        "type": "지출",
+        "category": "식비",
+        "description": "점심식사",
+        "amount": -12000,
+        "memo": "",
+    }
+    assert transactions[-1] == {
+        "date": "2026-01-28",
+        "type": "기타수입",
+        "category": "기타수입",
+        "description": "중고 판매",
+        "amount": 25000,
+        "memo": "중고마켓",
+    }

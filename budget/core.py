@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import csv
+from pathlib import Path
 from typing import Any
 
 
@@ -49,3 +51,30 @@ def filter_by_category(transactions: list[dict[str, Any]], category: str) -> lis
         for transaction in transactions
         if transaction["category"].lower() == normalized_category
     ]
+
+
+def load_transactions_from_csv(csv_path: str) -> list[dict[str, Any]]:
+    """Load transactions from a CSV file.
+
+    Args:
+        csv_path: Path to the CSV file.
+
+    Returns:
+        A list of transaction dictionaries with amount converted to int.
+    """
+    transactions: list[dict[str, Any]] = []
+    with Path(csv_path).open("r", encoding="utf-8-sig", newline="") as csv_file:
+        reader = csv.DictReader(csv_file)
+        for row in reader:
+            transactions.append(
+                {
+                    "date": row["date"],
+                    "type": row["type"],
+                    "category": row["category"],
+                    "description": row["description"],
+                    "amount": int(row["amount"]),
+                    "memo": row["memo"],
+                }
+            )
+
+    return transactions
