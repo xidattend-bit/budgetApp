@@ -16,3 +16,18 @@ def add_transaction(transactions: list[dict[str, Any]], transaction: dict[str, A
         A new list containing the added transaction.
     """
     return [*transactions, transaction]
+
+
+def get_balance(transactions: list[dict[str, Any]]) -> float:
+    """Return the balance by summing all transaction amounts.
+
+    Args:
+        transactions: Transaction records to total.
+
+    Returns:
+        Total balance as a float. Empty input returns 0.0.
+    """
+    if not transactions:
+        return 0.0
+
+    return float(sum(transaction["amount"] for transaction in transactions))
