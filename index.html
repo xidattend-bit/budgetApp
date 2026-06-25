@@ -1,0 +1,891 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>budgetApp | 가계부 대시보드</title>
+    <style>
+      :root {
+        --bg: #07111f;
+        --bg-2: #0d1b31;
+        --card: rgba(13, 27, 49, 0.72);
+        --card-strong: rgba(20, 38, 66, 0.92);
+        --text: #eef4ff;
+        --muted: #a9b9d6;
+        --line: rgba(173, 199, 255, 0.16);
+        --accent: #77e2ff;
+        --accent-2: #8b7bff;
+        --good: #61e4a2;
+        --bad: #ff6b8a;
+        --shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(119, 226, 255, 0.18), transparent 28%),
+          radial-gradient(circle at top right, rgba(139, 123, 255, 0.18), transparent 24%),
+          linear-gradient(160deg, var(--bg), var(--bg-2));
+        min-height: 100vh;
+      }
+
+      .app {
+        width: min(1200px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 32px 0 48px;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 20px;
+        align-items: stretch;
+      }
+
+      .panel {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      .hero-main {
+        padding: 28px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 13px;
+        letter-spacing: 0.03em;
+      }
+
+      h1 {
+        margin: 18px 0 8px;
+        font-size: clamp(30px, 5vw, 54px);
+        line-height: 1.04;
+        letter-spacing: -0.04em;
+      }
+
+      .lead {
+        margin: 0;
+        max-width: 60ch;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 22px;
+      }
+
+      .button,
+      .button-secondary,
+      .chip {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.04);
+        cursor: pointer;
+        transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+      }
+
+      .button {
+        padding: 14px 18px;
+        font-weight: 700;
+      }
+
+      .button-secondary {
+        padding: 14px 18px;
+        color: var(--muted);
+      }
+
+      .button:hover,
+      .button-secondary:hover,
+      .chip:hover,
+      .nav-card:hover {
+        transform: translateY(-2px);
+      }
+
+      .hero-aside {
+        display: grid;
+        gap: 14px;
+      }
+
+      .mini {
+        padding: 20px;
+      }
+
+      .mini h3,
+      .section-title {
+        margin: 0 0 8px;
+        font-size: 18px;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        margin-top: 20px;
+      }
+
+      .stat-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 16px;
+      }
+
+      .stat-label {
+        color: var(--muted);
+        font-size: 13px;
+        margin-bottom: 8px;
+      }
+
+      .stat-value {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+      }
+
+      .stat-delta {
+        margin-top: 6px;
+        font-size: 13px;
+        color: var(--good);
+      }
+
+      .layout {
+        margin-top: 20px;
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 20px;
+      }
+
+      .nav {
+        padding: 18px;
+      }
+
+      .nav-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .chip {
+        padding: 10px 12px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .nav-list {
+        display: grid;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .nav-card {
+        text-align: left;
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text);
+        cursor: pointer;
+      }
+
+      .nav-card.active {
+        background: linear-gradient(135deg, rgba(119, 226, 255, 0.14), rgba(139, 123, 255, 0.14));
+        border-color: rgba(119, 226, 255, 0.4);
+      }
+
+      .nav-card-title {
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .nav-card-desc {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .content {
+        padding: 22px;
+      }
+
+      .content-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      select,
+      input[type="file"] {
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 12px 14px;
+      }
+
+      select option {
+        color: #0b1320;
+      }
+
+      .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 18px;
+        margin-top: 18px;
+      }
+
+      .chart,
+      .detail,
+      .table-panel {
+        padding: 18px;
+        border-radius: 20px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .chart-bars {
+        display: grid;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .bar-row {
+        display: grid;
+        grid-template-columns: 80px 1fr 84px;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .bar-track {
+        height: 10px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .bar-fill {
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .list {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .list-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .pill {
+        display: inline-flex;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        background: rgba(119, 226, 255, 0.14);
+        color: #c9f8ff;
+      }
+
+      .amount-positive {
+        color: var(--good);
+      }
+
+      .amount-negative {
+        color: var(--bad);
+      }
+
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+      }
+
+      .table th,
+      .table td {
+        padding: 12px 10px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        font-size: 14px;
+      }
+
+      .table th {
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .footer-note {
+        margin-top: 16px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      @media (max-width: 980px) {
+        .hero,
+        .layout,
+        .content-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <section class="hero">
+        <div class="panel hero-main">
+          <div class="eyebrow">budgetApp Dashboard · CSV 기반 가계부</div>
+          <h1>한눈에 보는 일간·월간 가계부 통계</h1>
+          <p class="lead">
+            첫 화면은 요약 알림과 핵심 지표 중심으로 구성했고, 카드를 클릭하면 일별·월별 통계를 바로 확인할 수 있습니다.
+            CSV 업로드도 지원해서 샘플 데이터와 개인 데이터를 모두 볼 수 있게 했습니다.
+          </p>
+          <div class="hero-actions">
+            <button class="button" id="go-overview">요약 보기</button>
+            <button class="button-secondary" id="go-daily">일간 통계</button>
+            <button class="button-secondary" id="go-monthly">월간 통계</button>
+            <button class="button-secondary" id="go-table">거래 내역</button>
+          </div>
+
+          <div class="stats-grid" id="hero-stats"></div>
+        </div>
+
+        <div class="hero-aside">
+          <div class="panel mini">
+            <h3>빠른 알림</h3>
+            <p class="muted" id="summary-note">샘플 CSV를 기반으로 최신 월과 일간 변화를 계산합니다.</p>
+          </div>
+          <div class="panel mini">
+            <h3>핵심 기능</h3>
+            <div class="list" id="feature-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="layout">
+        <aside class="panel nav">
+          <div class="nav-header">
+            <div>
+              <div class="section-title">통계 카드</div>
+              <div class="muted">클릭해서 상세 보기</div>
+            </div>
+            <button class="chip" id="load-sample">샘플 다시 불러오기</button>
+          </div>
+          <div class="nav-list" id="nav-list"></div>
+          <div style="margin-top: 16px">
+            <label class="chip" for="csv-upload">CSV 업로드</label>
+            <input id="csv-upload" type="file" accept=".csv,text/csv" />
+          </div>
+        </aside>
+
+        <section class="panel content">
+          <div class="content-top">
+            <div>
+              <div class="section-title" id="view-title">요약 대시보드</div>
+              <div class="muted" id="view-subtitle">현재 데이터셋의 핵심 지표를 보여줍니다.</div>
+            </div>
+            <div class="toolbar">
+              <select id="month-select"></select>
+              <select id="category-select"></select>
+            </div>
+          </div>
+
+          <div class="content-grid">
+            <div class="chart">
+              <div class="section-title" id="chart-title">월간 수입/지출 비교</div>
+              <div class="muted" id="chart-hint">최근 6개월을 기준으로 시각화합니다.</div>
+              <div class="chart-bars" id="chart-bars"></div>
+            </div>
+
+            <div class="detail">
+              <div class="section-title" id="detail-title">선택된 통계</div>
+              <div class="list" id="detail-list"></div>
+            </div>
+          </div>
+
+          <div class="table-panel" id="table-panel" style="margin-top: 18px">
+            <div class="section-title">최근 거래 내역</div>
+            <div class="muted">선택한 월과 카테고리에 맞는 거래를 보여줍니다.</div>
+            <div style="overflow-x: auto">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>날짜</th>
+                    <th>구분</th>
+                    <th>카테고리</th>
+                    <th>설명</th>
+                    <th>금액</th>
+                  </tr>
+                </thead>
+                <tbody id="transaction-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="footer-note">
+            샘플 파일은 브라우저에서 직접 열 경우 로드가 제한될 수 있습니다. 그런 경우에는 CSV 업로드를 사용하면 동일한 화면에서 바로 통계를 확인할 수 있습니다.
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script>
+      const state = {
+        transactions: [],
+        monthly: {},
+        selectedMonth: "",
+        selectedCategory: "",
+        activeView: "overview",
+      };
+
+      const featureItems = [
+        "첫 화면 요약 알림",
+        "일간/월간 상세 통계",
+        "카테고리 필터",
+        "CSV 파일 업로드",
+        "최근 거래 테이블",
+        "반응형 모던 디자인",
+      ];
+
+      const sampleFiles = {
+        overview: "data/step4_large_transactions.csv",
+        daily: "data/step1_transactions.csv",
+        monthly: "data/step3_transactions.csv",
+      };
+
+      const heroStats = document.getElementById("hero-stats");
+      const featureList = document.getElementById("feature-list");
+      const navList = document.getElementById("nav-list");
+      const chartBars = document.getElementById("chart-bars");
+      const detailList = document.getElementById("detail-list");
+      const transactionBody = document.getElementById("transaction-body");
+      const viewTitle = document.getElementById("view-title");
+      const viewSubtitle = document.getElementById("view-subtitle");
+      const chartTitle = document.getElementById("chart-title");
+      const chartHint = document.getElementById("chart-hint");
+      const detailTitle = document.getElementById("detail-title");
+      const summaryNote = document.getElementById("summary-note");
+      const monthSelect = document.getElementById("month-select");
+      const categorySelect = document.getElementById("category-select");
+      const csvUpload = document.getElementById("csv-upload");
+
+      function formatMoney(value) {
+        return new Intl.NumberFormat("ko-KR").format(value) + "원";
+      }
+
+      function parseCsv(text) {
+        const lines = text.trim().split(/\r?\n/);
+        const headers = lines.shift().replace(/^\uFEFF/, "").split(",");
+        return lines.filter(Boolean).map((line) => {
+          const values = line.split(",");
+          return headers.reduce((record, header, index) => {
+            record[header] = values[index] ?? "";
+            return record;
+          }, {});
+        });
+      }
+
+      function normalizeTransactions(rawTransactions) {
+        return rawTransactions.map((transaction) => ({
+          date: transaction.date,
+          type: transaction.type,
+          category: transaction.category,
+          description: transaction.description,
+          amount: Number(transaction.amount),
+          memo: transaction.memo || "",
+        }));
+      }
+
+      function buildMonthlySummary(transactions) {
+        return transactions.reduce((summary, transaction) => {
+          const month = transaction.date.slice(0, 7);
+          if (!summary[month]) {
+            summary[month] = { income: 0, expense: 0, net: 0 };
+          }
+          if (transaction.amount >= 0) {
+            summary[month].income += transaction.amount;
+          } else {
+            summary[month].expense += transaction.amount;
+          }
+          summary[month].net += transaction.amount;
+          return summary;
+        }, {});
+      }
+
+      function buildDailySummary(transactions) {
+        return transactions.reduce((summary, transaction) => {
+          const day = transaction.date;
+          if (!summary[day]) {
+            summary[day] = { income: 0, expense: 0, net: 0, count: 0 };
+          }
+          if (transaction.amount >= 0) {
+            summary[day].income += transaction.amount;
+          } else {
+            summary[day].expense += transaction.amount;
+          }
+          summary[day].net += transaction.amount;
+          summary[day].count += 1;
+          return summary;
+        }, {});
+      }
+
+      function getUniqueMonths(transactions) {
+        return [...new Set(transactions.map((transaction) => transaction.date.slice(0, 7)))].sort();
+      }
+
+      function getUniqueCategories(transactions) {
+        return [...new Set(transactions.map((transaction) => transaction.category))].sort();
+      }
+
+      function renderStats() {
+        const monthlyKeys = Object.keys(state.monthly).sort();
+        const latestMonth = monthlyKeys[monthlyKeys.length - 1];
+        const monthly = state.monthly[latestMonth] || { income: 0, expense: 0, net: 0 };
+        const daily = buildDailySummary(state.transactions);
+        const dailyKeys = Object.keys(daily).sort();
+        const latestDay = dailyKeys[dailyKeys.length - 1];
+        const latestDayStat = daily[latestDay] || { income: 0, expense: 0, net: 0, count: 0 };
+        const totalIncome = state.transactions.filter((item) => item.amount >= 0).reduce((sum, item) => sum + item.amount, 0);
+        const totalExpense = state.transactions.filter((item) => item.amount < 0).reduce((sum, item) => sum + item.amount, 0);
+
+        heroStats.innerHTML = `
+          <div class="stat-card">
+            <div class="stat-label">총 거래 건수</div>
+            <div class="stat-value">${state.transactions.length}</div>
+            <div class="stat-delta">전체 CSV 기준</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">최신 월 순이익</div>
+            <div class="stat-value">${formatMoney(monthly.net)}</div>
+            <div class="stat-delta">${latestMonth || "-"} 기준</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">최신 일 순이익</div>
+            <div class="stat-value">${formatMoney(latestDayStat.net)}</div>
+            <div class="stat-delta">${latestDay || "-"} 기준</div>
+          </div>
+        `;
+
+        summaryNote.textContent = latestMonth
+          ? `${latestMonth}의 순이익은 ${formatMoney(monthly.net)}입니다. 수입 ${formatMoney(monthly.income)}, 지출 ${formatMoney(Math.abs(monthly.expense))}.`
+          : "데이터가 없습니다.";
+
+        featureList.innerHTML = featureItems
+          .map((item) => `<div class="list-item"><span>${item}</span><span class="pill">ON</span></div>`)
+          .join("");
+
+        navList.innerHTML = [
+          {
+            key: "overview",
+            title: "요약 대시보드",
+            desc: "전체 거래 흐름과 최신 월간 지표를 한 번에 봅니다.",
+          },
+          {
+            key: "daily",
+            title: "일간 통계",
+            desc: "선택한 날짜 또는 최신 일자 기준 수입/지출을 확인합니다.",
+          },
+          {
+            key: "monthly",
+            title: "월간 통계",
+            desc: "월별 합계와 순이익 추세를 살펴봅니다.",
+          },
+          {
+            key: "table",
+            title: "거래 내역",
+            desc: "선택한 월과 카테고리로 필터된 실제 거래를 확인합니다.",
+          },
+        ]
+          .map(
+            (item) => `
+              <button class="nav-card ${state.activeView === item.key ? "active" : ""}" data-view="${item.key}">
+                <div class="nav-card-title">${item.title}</div>
+                <div class="nav-card-desc">${item.desc}</div>
+              </button>
+            `,
+          )
+          .join("");
+
+        document.querySelectorAll(".nav-card").forEach((button) => {
+          button.addEventListener("click", () => switchView(button.dataset.view));
+        });
+
+        monthSelect.innerHTML = [
+          `<option value="">전체 월</option>`,
+          ...monthlyKeys.map((month) => `<option value="${month}" ${state.selectedMonth === month ? "selected" : ""}>${month}</option>`),
+        ].join("");
+
+        categorySelect.innerHTML = [
+          `<option value="">전체 카테고리</option>`,
+          ...getUniqueCategories(state.transactions).map(
+            (category) => `<option value="${category}" ${state.selectedCategory === category ? "selected" : ""}>${category}</option>`,
+          ),
+        ].join("");
+
+        renderView(totalIncome, totalExpense);
+      }
+
+      function getFilteredTransactions() {
+        return state.transactions.filter((transaction) => {
+          const matchesMonth = !state.selectedMonth || transaction.date.slice(0, 7) === state.selectedMonth;
+          const matchesCategory = !state.selectedCategory || transaction.category === state.selectedCategory;
+          return matchesMonth && matchesCategory;
+        });
+      }
+
+      function renderView(totalIncome, totalExpense) {
+        const filtered = getFilteredTransactions();
+        const monthlyKeys = Object.keys(state.monthly).sort();
+        const dailySummary = buildDailySummary(state.transactions);
+        const dailyKeys = Object.keys(dailySummary).sort();
+        const latestDay = dailyKeys[dailyKeys.length - 1];
+        const latestMonth = monthlyKeys[monthlyKeys.length - 1];
+
+        if (state.activeView === "overview") {
+          viewTitle.textContent = "요약 대시보드";
+          viewSubtitle.textContent = "첫 화면에서 핵심 알림과 최근 흐름을 바로 확인합니다.";
+          chartTitle.textContent = "최근 월간 수입/지출";
+          chartHint.textContent = "최근 6개월 기준의 월별 요약입니다.";
+          detailTitle.textContent = "핵심 알림";
+          chartBars.innerHTML = renderMonthlyBars(monthlyKeys.slice(-6));
+          detailList.innerHTML = [
+            `전체 수입: ${formatMoney(totalIncome)}`,
+            `전체 지출: ${formatMoney(Math.abs(totalExpense))}`,
+            `최신 월: ${latestMonth || "-"}`,
+            `최신 일: ${latestDay || "-"}`,
+          ]
+            .map((item) => `<div class="list-item"><span>${item}</span></div>`)
+            .join("");
+        } else if (state.activeView === "daily") {
+          viewTitle.textContent = "일간 통계";
+          viewSubtitle.textContent = "최근 일자별 거래 패턴을 확인합니다.";
+          chartTitle.textContent = "일간 순이익 추이";
+          chartHint.textContent = "최근 10일을 기준으로 표시합니다.";
+          detailTitle.textContent = "선택 일자 요약";
+          chartBars.innerHTML = renderDailyBars(dailyKeys.slice(-10), dailySummary);
+          detailList.innerHTML = renderDailyDetail(dailySummary, dailyKeys);
+        } else if (state.activeView === "monthly") {
+          viewTitle.textContent = "월간 통계";
+          viewSubtitle.textContent = "월별 수입, 지출, 순이익을 카드 형태로 보여줍니다.";
+          chartTitle.textContent = "월간 순이익";
+          chartHint.textContent = "최근 12개월 기준으로 정렬합니다.";
+          detailTitle.textContent = "월별 카드";
+          chartBars.innerHTML = renderMonthlyBars(monthlyKeys.slice(-12));
+          detailList.innerHTML = renderMonthlyDetail(monthlyKeys);
+        } else {
+          viewTitle.textContent = "거래 내역";
+          viewSubtitle.textContent = "필터와 결합해서 원하는 거래만 골라봅니다.";
+          chartTitle.textContent = "필터 결과 미리보기";
+          chartHint.textContent = "선택한 월과 카테고리 조건이 반영됩니다.";
+          detailTitle.textContent = "필터 상태";
+          chartBars.innerHTML = renderMonthlyBars(monthlyKeys.slice(-6));
+          detailList.innerHTML = [
+            `선택 월: ${state.selectedMonth || "전체"}`,
+            `선택 카테고리: ${state.selectedCategory || "전체"}`,
+            `필터 결과: ${filtered.length}건`,
+          ]
+            .map((item) => `<div class="list-item"><span>${item}</span></div>`)
+            .join("");
+        }
+
+        transactionBody.innerHTML = filtered
+          .slice(-12)
+          .reverse()
+          .map(
+            (transaction) => `
+              <tr>
+                <td>${transaction.date}</td>
+                <td>${transaction.type}</td>
+                <td>${transaction.category}</td>
+                <td>${transaction.description}</td>
+                <td class="${transaction.amount >= 0 ? "amount-positive" : "amount-negative"}">${formatMoney(transaction.amount)}</td>
+              </tr>
+            `,
+          )
+          .join("");
+      }
+
+      function renderMonthlyBars(months) {
+        const entries = months.map((month) => [month, state.monthly[month]]);
+        const maxNet = Math.max(...entries.map(([, value]) => Math.abs(value.net)), 1);
+        return entries
+          .map(
+            ([month, value]) => `
+              <div class="bar-row">
+                <div class="muted">${month}</div>
+                <div class="bar-track"><div class="bar-fill" style="width:${(Math.abs(value.net) / maxNet) * 100}%"></div></div>
+                <div style="text-align:right">${formatMoney(value.net)}</div>
+              </div>
+            `,
+          )
+          .join("");
+      }
+
+      function renderDailyBars(days, summary) {
+        const entries = days.map((day) => [day, summary[day]]);
+        const maxNet = Math.max(...entries.map(([, value]) => Math.abs(value.net)), 1);
+        return entries
+          .map(
+            ([day, value]) => `
+              <div class="bar-row">
+                <div class="muted">${day.slice(5)}</div>
+                <div class="bar-track"><div class="bar-fill" style="width:${(Math.abs(value.net) / maxNet) * 100}%"></div></div>
+                <div style="text-align:right">${formatMoney(value.net)}</div>
+              </div>
+            `,
+          )
+          .join("");
+      }
+
+      function renderDailyDetail(summary, dailyKeys) {
+        const latest = dailyKeys[dailyKeys.length - 1];
+        const value = summary[latest] || { income: 0, expense: 0, net: 0, count: 0 };
+        return [
+          `최근 일자: ${latest || "-"}`,
+          `수입: ${formatMoney(value.income)}`,
+          `지출: ${formatMoney(Math.abs(value.expense))}`,
+          `순이익: ${formatMoney(value.net)}`,
+          `거래 수: ${value.count || 0}건`,
+        ]
+          .map((item) => `<div class="list-item"><span>${item}</span></div>`)
+          .join("");
+      }
+
+      function renderMonthlyDetail(months) {
+        return months
+          .slice(-6)
+          .reverse()
+          .map((month) => {
+            const value = state.monthly[month];
+            return `
+              <div class="list-item">
+                <div>
+                  <div class="nav-card-title">${month}</div>
+                  <div class="nav-card-desc">수입 ${formatMoney(value.income)} · 지출 ${formatMoney(Math.abs(value.expense))}</div>
+                </div>
+                <div class="pill">${formatMoney(value.net)}</div>
+              </div>
+            `;
+          })
+          .join("");
+      }
+
+      function switchView(view) {
+        state.activeView = view;
+        renderStats();
+      }
+
+      async function loadSample(filePath, fallbackText = "") {
+        try {
+          const response = await fetch(filePath);
+          if (!response.ok) {
+            throw new Error("fetch failed");
+          }
+          return await response.text();
+        } catch {
+          return fallbackText;
+        }
+      }
+
+      async function loadDataFromText(text) {
+        const rawTransactions = parseCsv(text);
+        state.transactions = normalizeTransactions(rawTransactions);
+        state.monthly = buildMonthlySummary(state.transactions);
+        state.selectedMonth = getUniqueMonths(state.transactions).at(-1) || "";
+        state.selectedCategory = "";
+        renderStats();
+      }
+
+      async function boot() {
+        featureList.innerHTML = featureItems
+          .map((item) => `<div class="list-item"><span>${item}</span><span class="pill">NEW</span></div>`)
+          .join("");
+
+        monthSelect.addEventListener("change", (event) => {
+          state.selectedMonth = event.target.value;
+          renderStats();
+        });
+
+        categorySelect.addEventListener("change", (event) => {
+          state.selectedCategory = event.target.value;
+          renderStats();
+        });
+
+        csvUpload.addEventListener("change", async (event) => {
+          const file = event.target.files?.[0];
+          if (!file) return;
+          const text = await file.text();
+          await loadDataFromText(text);
+        });
+
+        document.getElementById("load-sample").addEventListener("click", async () => {
+          const text = await loadSample(sampleFiles.overview);
+          await loadDataFromText(text);
+        });
+
+        document.getElementById("go-overview").addEventListener("click", () => switchView("overview"));
+        document.getElementById("go-daily").addEventListener("click", () => switchView("daily"));
+        document.getElementById("go-monthly").addEventListener("click", () => switchView("monthly"));
+        document.getElementById("go-table").addEventListener("click", () => switchView("table"));
+
+        const initialText =
+          (await loadSample(sampleFiles.overview)) ||
+          (await loadSample(sampleFiles.monthly)) ||
+          "";
+        if (initialText) {
+          await loadDataFromText(initialText);
+        }
+      }
+
+      boot();
+    </script>
+  </body>
+</html>
